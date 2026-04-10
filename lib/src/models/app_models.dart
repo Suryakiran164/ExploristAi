@@ -49,7 +49,6 @@ class PlaceRecommendationModel {
   final String estimatedTravelCost; 
   final String estimatedTime;       
   final String imageUrl;
-  
   final List<String> tags; 
   final String avgTemp;    
   final String difficulty; 
@@ -117,7 +116,6 @@ class TripModel {
     };
   }
 
-  // REQUIRED FOR THE SAVED SCREEN TO WORK
   factory TripModel.fromMap(Map<String, dynamic> map) {
     return TripModel(
       tripId: map['tripId'] ?? '',
