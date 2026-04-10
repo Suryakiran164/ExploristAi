@@ -10,19 +10,27 @@ import 'src/routing/app_router.dart';
 import 'src/theme/app_theme.dart';
 
 void main() async {
-  // Ensure Flutter bindings are initialized before calling native code
+  // 1. Ensure Flutter bindings are initialized
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Load environment variables (Gemini API Key)
-  await dotenv.load(fileName: ".env");
+  // 2. Load Gemini API Key from .env file
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (e) {
+    debugPrint("Warning: .env file not found. Ensure GEMINI_API_KEY is set.");
+  }
   
-  // Initialize Firebase with platform-specific options (Critical for Web)
+  // 3. Initialize Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
   
-  // Launch the app wrapped in Riverpod's ProviderScope for state management
-  runApp(const ProviderScope(child: ExploristApp()));
+  // 4. Run App
+  runApp(
+    const ProviderScope(
+      child: ExploristApp(),
+    ),
+  );
 }
 
 class ExploristApp extends ConsumerWidget {
@@ -30,12 +38,14 @@ class ExploristApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Watch the router provider to handle navigation and auth redirects
+    // 5. Watch the routerProvider from app_router.dart
     final router = ref.watch(routerProvider);
     
     return MaterialApp.router(
       title: 'Explorist AI',
-      theme: AppTheme.lightTheme,
+      // Uses the custom theme we discussed
+      theme: AppTheme.lightTheme, 
+      // Connects the GoRouter config
       routerConfig: router,
       debugShowCheckedModeBanner: false,
     );

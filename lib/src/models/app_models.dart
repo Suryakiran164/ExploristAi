@@ -46,20 +46,48 @@ class UserModel {
 class PlaceRecommendationModel {
   final String name;
   final String summary;
-  final String estimatedTravelCost;
-  final String estimatedTime;
+  final String estimatedTravelCost; 
+  final String estimatedTime;       
   final String imageUrl;
+  
+  final List<String> tags; 
+  final String avgTemp;    
+  final String difficulty; 
+  final String bestVisit;  
+  final String popularity; 
+  final String flightCost; 
+  final String stayCost;   
+  final String rentalCost; 
+  final List<Map<String, String>> activities;
 
   PlaceRecommendationModel({
     required this.name, required this.summary, required this.estimatedTravelCost,
     required this.estimatedTime, required this.imageUrl,
+    required this.tags, required this.avgTemp, required this.difficulty,
+    required this.bestVisit, required this.popularity, required this.flightCost,
+    required this.stayCost, required this.rentalCost, required this.activities,
   });
 
   factory PlaceRecommendationModel.fromMap(Map<String, dynamic> map) {
     return PlaceRecommendationModel(
-      name: map['name'] ?? '', summary: map['summary'] ?? '',
+      name: map['name'] ?? '', 
+      summary: map['summary'] ?? '',
       estimatedTravelCost: map['estimatedTravelCost'] ?? '',
-      estimatedTime: map['estimatedTime'] ?? '', imageUrl: map['imageUrl'] ?? '',
+      estimatedTime: map['estimatedTime'] ?? '', 
+      imageUrl: map['imageUrl'] ?? '',
+      tags: List<String>.from(map['tags'] ?? []),
+      avgTemp: map['avgTemp'] ?? 'N/A',
+      difficulty: map['difficulty'] ?? 'N/A',
+      bestVisit: map['bestVisit'] ?? 'N/A',
+      popularity: map['popularity'] ?? 'N/A',
+      flightCost: map['flightCost'] ?? 'N/A',
+      stayCost: map['stayCost'] ?? 'N/A',
+      rentalCost: map['rentalCost'] ?? 'N/A',
+      activities: List<Map<String, String>>.from(
+        (map['activities'] as List<dynamic>? ?? []).map(
+          (x) => Map<String, String>.from(x as Map)
+        )
+      ),
     );
   }
 }
@@ -87,5 +115,21 @@ class TripModel {
       'budget': budget, 'itinerary': itinerary,
       'createdAt': createdAt.toIso8601String(),
     };
+  }
+
+  // REQUIRED FOR THE SAVED SCREEN TO WORK
+  factory TripModel.fromMap(Map<String, dynamic> map) {
+    return TripModel(
+      tripId: map['tripId'] ?? '',
+      userId: map['userId'] ?? '',
+      startingPoint: map['startingPoint'] ?? '',
+      destination: map['destination'] ?? '',
+      durationDays: map['durationDays']?.toInt() ?? 0,
+      budget: map['budget']?.toDouble() ?? 0.0,
+      itinerary: List<Map<String, dynamic>>.from(
+        (map['itinerary'] as List<dynamic>? ?? []).map((x) => Map<String, dynamic>.from(x as Map))
+      ),
+      createdAt: map['createdAt'] != null ? DateTime.parse(map['createdAt']) : DateTime.now(),
+    );
   }
 }

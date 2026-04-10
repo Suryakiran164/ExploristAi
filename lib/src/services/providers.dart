@@ -56,7 +56,7 @@ class GeminiService extends _$GeminiService {
   @override
   void build() {
     _model = GenerativeModel(
-      // Updated to use the lightweight, fast 2.5 Flash Lite model
+      // Lightweight, fast 2.5 Flash Lite model
       model: 'gemini-2.5-flash-lite',
       apiKey: dotenv.env['GEMINI_API_KEY'] ?? '',
       // Forcing strict JSON output at the server level
@@ -68,11 +68,34 @@ class GeminiService extends _$GeminiService {
 
   Future<List<PlaceRecommendationModel>> getRecommendations(UserModel user) async {
     final prompt = '''
-      You are an expert travel concierge. Suggest 5 travel destinations for a ${user.age} year old from ${user.state}, ${user.country}. 
+      You are an elite, highly personalized travel AI. Suggest 5 unique travel destinations for a ${user.age}-year-old from ${user.state}, ${user.country}. 
       Their preferred environments are: ${user.preferredEnvironments.join(', ')}.
-      CRITICAL INSTRUCTION: Do NOT recommend any of these places: ${user.visitedPlaces.join(', ')}.
       
-      Return a JSON array of objects with these exact keys: "name", "summary", "estimatedTravelCost", "estimatedTime", "imageUrl" (provide a realistic unsplash placeholder URL for the image).
+      CRITICAL INSTRUCTION 1: Do NOT recommend any of these places: ${user.visitedPlaces.join(', ')}.
+      CRITICAL INSTRUCTION 2: Tailor these recommendations specifically for an adventure motorcycle rider operating a mid-weight (180kg) adventure bike with responsive torque (approx 26.5 nm). Focus on scenic routes, mountain passes, and rugged terrain that suit this riding style, blending it perfectly with their preferred environments.
+
+      Return ONLY a valid JSON array of objects. Do not include markdown formatting. Each object MUST match this exact schema:
+      [
+        {
+          "name": "Destination Name",
+          "summary": "A vivid 2-sentence description highlighting why it's perfect for their travel and riding style.",
+          "imageUrl": "https://source.unsplash.com/800x600/?motorcycle,scenic",
+          "estimatedTravelCost": "\$1500",
+          "estimatedTime": "10 Days",
+          "tags": ["SCENIC ROUTES", "ADVENTURE RIDING"],
+          "avgTemp": "22°C",
+          "difficulty": "Moderate",
+          "bestVisit": "May - Sep",
+          "popularity": "High",
+          "flightCost": "\$450 - \$820",
+          "stayCost": "\$80 - \$150",
+          "rentalCost": "\$45 / day",
+          "activities": [
+            {"tag": "ADVENTURE", "title": "High-altitude mountain pass riding"},
+            {"tag": "SCENIC", "title": "Coastal highway exploration"}
+          ]
+        }
+      ]
     '''; 
     
     final content = [Content.text(prompt)];
@@ -92,14 +115,53 @@ class GeminiService extends _$GeminiService {
   }
 
   Future<Map<String, dynamic>> generateItinerary({
-    required String start, required String destination,
-    required int days, required double budget
+    required String start, 
+    required String destination,
+    required int days, 
+    required double budget,
+    required List<String> preferences,
   }) async {
     final prompt = '''
-      Act as a budget-conscious travel agent. Construct a $days-day itinerary starting from $start to $destination. Total budget: \$$budget.
-      Generate a logical day-by-day itinerary that fits within the budget constraint, suggesting specific transport types and lodging tiers.
-      Return a JSON object with a key "itinerary" containing an array of objects. Each object should have:
-      "day" (int), "title" (string), "lodging" (string), "activities" (list of strings), "estimatedDailyCost" (number).
+      Act as an elite travel architect. Construct a $days-day itinerary starting from $start to $destination. Total budget: ₹$budget INR.
+      The traveler's preferences are: ${preferences.join(', ')}. Factor this into the transport, roads, and activities chosen.
+
+      Return a JSON object with this EXACT schema. Do not use markdown (no ```json).
+      {
+        "tripTitle": "A catchy title for the trip",
+        "itinerary": [
+          {
+            "day": 1,
+            "dayTitle": "Arrival & Exploration",
+            "daySummary": "A brief overview of the day.",
+            "lodging": {
+              "name": "Hotel Name",
+              "description": "Brief description",
+              "costPerNight": "₹4500",
+              "imageUrl": "[https://source.unsplash.com/600x400/?hotel,boutique](https://source.unsplash.com/600x400/?hotel,boutique)"
+            },
+            "events": [
+              {
+                "type": "food", // Must be "food", "activity", or "transport"
+                "title": "Dinner at Local Spot",
+                "description": "Details about the food.",
+                "cost": "₹1200",
+                "bestTime": "8:00 PM",
+                "entryTicket": "Not Applicable",
+                "imageUrl": "" // Leave empty for food/transport, provide unsplash URL for activities
+              },
+              {
+                "type": "activity",
+                "title": "Museum Visit",
+                "description": "Explore the history.",
+                "cost": "₹500",
+                "bestTime": "10:00 AM",
+                "entryTicket": "Required - Book in advance",
+                "imageUrl": "[https://source.unsplash.com/600x400/?museum](https://source.unsplash.com/600x400/?museum)"
+              }
+            ]
+          }
+        ]
+      }
     ''';
     
     final content = [Content.text(prompt)];
